@@ -1,0 +1,55 @@
+---
+- name: Apache HTTP Server web server deployment
+  hosts: webserver
+  become: true
+  tasks:
+    - name: Latest software installed for Apache HTTPD
+      yum:
+        name: "{{ item }}"
+        state: latest
+      loop:
+        - httpd
+        - mod_ssl
+      notify: Restart httpd
+
+    - name: Web content is in place
+      import_tasks: deploy_content.yml
+
+    - name: Serverc Virtual hosts are configured
+      template:
+        src: "httpd.conf.j2"
+        dest: "/etc/httpd/conf.d/httpd.conf"
+      notify: Reload httpd
+
+
+    - name: Virtual hosts are configured
+      template:
+        src: "hvirtual.conf.j2"
+        dest: "/etc/httpd/conf.d/virtual.conf"
+      notify: Reload httpd
+
+    - name: Web server is started and enabled
+      service:
+        name: httpd
+        state: started
+        enabled: yes
+
+    - name: Firewall ports are open
+      firewalld:
+        service: "{{ item }}"
+        permanent: yes
+        immediate: yes
+        state: enabled
+      loop:
+        - http
+        - https
+
+  handlers:
+    - name: Reload httpd
+      service:
+        name: httpd
+        state: reloaded
+    - name: Restart httpd
+      service:
+        name: httpd
+        state: restarted

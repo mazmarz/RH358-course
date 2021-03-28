@@ -1,0 +1,72 @@
+- name: Document root exists for servers web site
+  file:
+    path: "/srv/FIX_ME/www"
+    state: directory
+    owner: root
+    mode: '0755'
+
+- name: Document root exists for virtual servers web site
+  file:
+    path: "/srv/virtual/www"
+    state: directory
+    owner: root
+    mode: '0755'
+
+- name: Index test pages are correct
+  template:
+    src: "index.html.j2"
+    dest: "/srv/FIX_ME/www/index.html"
+
+- name: Virtual index test pages are correct
+  template:
+    src: "virtual.html.j2"
+    dest: "/srv/virtual/www/index.html"
+
+- name: SELinux policy is correct for web site location
+  sefcontext:
+    target: '/srv/www(/.*)?'
+    setype: httpd_sys_content_t
+    state: present
+
+- name: Correct SELinux file context is on web content
+  file:
+    path: /srv/FIX_ME/www
+    state: directory
+    recurse: yes
+    follow: no
+    setype: _default
+
+- name: Correct SELinux file context is on web content
+  file:
+    path: /srv/virtual/www
+    state: directory
+    recurse: yes
+    follow: no
+    setype: _default
+
+- name: Serverc host TLS certs in place
+  copy:
+    src: "serverc.lab.example.com.crt"
+    dest: "/etc/pki/tls/certs"
+
+- name: Serverc host TLS private keys in place
+  copy:
+    src: "serverc.lab.example.com.key"
+    dest: "/etc/pki/tls/private"
+    mode: '0600'
+
+- name: Virtual host TLS certs in place
+  copy:
+    src: "virtual.lab.example.com.crt"
+    dest: "/etc/pki/tls/certs"
+
+- name: Virtual host TLS private keys in place
+  copy:
+    src: "virtual.lab.example.com.key"
+    dest: "/etc/pki/tls/private"
+    mode: '0600'
+
+- name: example.com CA cert in place
+  copy:
+    src: "example-ca.crt"
+    dest: "/etc/pki/tls/certs/example-ca.crt"

@@ -1,0 +1,18 @@
+<VirtualHost *:443>
+ServerName virtual.lab.example.com
+SSLEngine On
+SSLProtocol all -SSLv2 -SSLv3
+SSLCipherSuite HIGH:MEDIUM:!aNull:!MD5
+SSLHonorCipherOrder on
+SSLCertificateFile /etc/pki/tls/certs/virtual.lab.example.com.crt
+SSLCertificateKeyFile /etc/pki/tls/private/virtual.lab.example.com.key
+SSLCertificateChainFile /etc/pki/tls/certs/example-ca.crt
+DocumentRoot /srv/virtual/www
+</VirtualHost>
+<Directory /srv/virtual/www>
+Require all granted
+</Directory>
+<VirtualHost *:80>
+ServerName virtual.lab.example.com
+Redirect "/" "https://virtual.lab.example.com"
+</VirtualHost>

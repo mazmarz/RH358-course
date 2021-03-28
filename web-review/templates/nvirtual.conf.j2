@@ -1,0 +1,15 @@
+server {
+    listen 80 ;
+    server_name virtual.lab.example.com;
+    return 301 https://$host$request_uri;
+}
+server {
+    listen 443 ssl;
+    server_name virtual.lab.example.com;
+    ssl_certificate /etc/pki/tls/certs/virtual.lab.example.com.crt;
+    ssl_certificate_key /etc/pki/tls/private/virtual.lab.example.com.key;
+    location / {
+        root /srv/virtual/www/;
+        index index.html index.htm;
+    }
+}

@@ -1,0 +1,48 @@
+---
+- name: Nginx web server deployment
+  hosts: webserver
+  become: true
+  tasks:
+    - name: Latest software installed for nginx
+      dnf:
+        name: "@nginx:1.16"
+        state: present
+      notify: Restart nginx
+
+    - name: Web content is in place
+      import_tasks: deploy_content.yml
+
+    - name: Set up nginx serverblock
+      template:
+        src: "nginx.conf.j2"
+        dest: "/etc/nginx/conf.d/nginx.conf"
+
+    - name: Set up nginx serverblock
+      template:
+        src: "nvirtual.conf.j2"
+        dest: "/etc/nginx/conf.d/virtual.conf"
+
+      notify: Reload nginx
+    - name: Firewall ports are open
+      firewalld:
+        service: "{{ item }}"
+        permanent: yes
+        immediate: yes
+        state: enabled
+      loop:
+        - https
+        - http
+    - name: Nginx is enabled and started
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+  handlers:
+    - name: Reload nginx
+      service:
+        name: nginx
+        state: reloaded
+    - name: Restart nginx
+      service:
+        name: nginx
+        state: restarted
