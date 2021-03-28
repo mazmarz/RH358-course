@@ -1,0 +1,14 @@
+  - name: Turn off all web servers
+    hosts:
+      - httpd
+      - nginx
+    become: true
+    tasks:
+      - name: Disable all web servers
+        service:
+          name: "{{ item }}"
+          state: stopped
+          enabled: no
+        loop:
+          - httpd
+          - nginx

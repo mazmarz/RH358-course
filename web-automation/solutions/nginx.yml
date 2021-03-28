@@ -1,0 +1,35 @@
+---
+- name: Nginx web server deployment
+  hosts: nginx
+  become: true
+
+  tasks:
+    - name: Latest software installed for nginx
+      yum:
+        name: "{{ nginx_packages }}"
+        state: present
+
+    - name: Web content is in place
+      import_tasks: deploy_content.yml
+
+    - name: Set up nginx serverblock
+      template:
+        src: "nginx.conf.j2"
+        dest: "/etc/nginx/conf.d/{{ item }}.conf"
+      loop: "{{ web_hosts }}"
+
+    - name: Firewall ports are open
+      firewalld:
+        service: "{{ item }}"
+        permanent: yes
+        immediate: yes
+        state: enabled
+      loop:
+        - https
+        - http
+
+    - name: Nginx is enabled and started
+      service:
+        name: nginx
+        state: started
+        enabled: yes

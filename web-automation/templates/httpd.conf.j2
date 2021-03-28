@@ -1,0 +1,20 @@
+<VirtualHost *:443>
+ServerName {{ item }}
+SSLEngine On
+SSLProtocol all -SSLv2 -SSLv3
+SSLCipherSuite HIGH:MEDIUM:!aNull:!MD5
+SSLHonorCipherOrder on
+SSLCertificateFile /etc/pki/tls/certs/{{ item }}.crt
+SSLCertificateKeyFile /etc/pki/tls/private/{{ item }}.key
+SSLCertificateChainFile /etc/pki/tls/certs/{{ cacert_file }}
+DocumentRoot /srv/www/{{ item }}
+</VirtualHost>
+<Directory /srv/www/{{ item }}>
+Require all granted
+</Directory>
+
+<VirtualHost *:80>
+ServerName {{ item }}
+Redirect "/" "https://{{ item }}"
+</VirtualHost>
+

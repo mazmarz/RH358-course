@@ -1,0 +1,49 @@
+
+- name: Document root exists for web sites
+  file:
+    path: "/srv/www/{{ item }}"
+    state: directory
+    owner: root
+    mode: '0755'
+  loop: "{{ web_hosts }}"
+
+- name: Index test pages are correct
+  template:
+    src: "index.html.j2"
+    dest: "/srv/www/{{ item }}/index.html"
+  loop: "{{ web_hosts }}"
+
+- name: SELinux policy is correct for web site location
+  sefcontext:
+    target: '/srv/www(/.*)?'
+    setype: httpd_sys_content_t
+    state: present
+
+- name: Correct SELinux file context is on web content
+  file:
+    path: /srv/www
+    state: directory
+    recurse: yes
+    follow: no
+    setype: _default
+
+- name: Virtual host TLS certs in place
+  copy:
+    src: "{{ item }}.crt"
+    dest: "/etc/pki/tls/certs"
+  loop: "{{ web_hosts }}"
+
+- name: Virtual host TLS private keys in place
+  copy:
+    src: "{{ item }}.key"
+    dest: "/etc/pki/tls/private"
+    mode: '0600'
+    owner: root
+    group: root
+  loop: "{{ web_hosts }}"
+
+- name: example.com CA cert in place
+  copy:
+    src: "{{ cacert_file }}"
+    dest: "/etc/pki/tls/certs/{{ cacert_file }}"
+

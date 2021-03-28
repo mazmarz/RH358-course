@@ -1,0 +1,7 @@
+---
+httpd_packages:
+  - httpd
+  - mod_ssl
+nginx_packages:
+  - '@nginx:1.16'
+cacert_file: "example-ca.crt"

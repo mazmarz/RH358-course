@@ -1,0 +1,35 @@
+---
+- name: Apache HTTP Server web server deployment
+  hosts: httpd
+  become: true
+
+  tasks:
+    - name: Latest software installed for Apache HTTPD
+      yum:
+        name: "{{ httpd_packages }}"
+        state: present
+
+    - name: Web content is in place
+      import_tasks: deploy_content.yml
+
+    - name: Virtual hosts are configured
+      template:
+        src: "httpd.conf.j2"
+        dest: "/etc/httpd/conf.d/{{ item }}.conf"
+      loop: "{{ web_hosts }}"
+
+    - name: Firewall ports are open
+      firewalld:
+        service: "{{ item }}"
+        permanent: yes
+        immediate: yes
+        state: enabled
+      loop:
+        - https
+        - http
+
+    - name: Web server is started and enabled
+      service:
+        name: httpd
+        state: started
+        enabled: yes

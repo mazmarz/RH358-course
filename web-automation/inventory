@@ -1,0 +1,9 @@
+[webservers]
+servera.lab.example.com
+serverb.lab.example.com
+
+[httpd]
+servera.lab.example.com
+
+[nginx]
+serverb.lab.example.com
